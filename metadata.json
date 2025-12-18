@@ -1,0 +1,5 @@
+{
+  "name": "Digital Bloom",
+  "description": "An interactive, procedurally animated flower blooming visualization built with React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}
