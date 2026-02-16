@@ -110,7 +110,7 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
     id: `l1-${i}`,
     rotation: i * 30,
     scale: 1.15,
-    delay: i * 20 // Quick ripple
+    delay: i * 20 
   }));
 
   // Layer 2: Mid/Back Petals (Darker, standard size) - Open shortly after
@@ -139,17 +139,18 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
 
   // Organic petal shape path
   const petalPath = "M0,0 C-6,-15 -18,-35 0,-55 C18,-35 6,-15 0,0";
+  
+  // Revised Liquid Blob Shape:
+  // Asymmetrical organic blob for more natural "wavy" fluid rotation effect
+  const liquidShapeIrregular = "M 0,-75 C 50,-75 85,-35 75,10 C 65,60 25,85 -10,80 C -55,75 -85,35 -80,-10 C -75,-60 -40,-75 0,-75 Z";
 
   // Smoother ease-out with a slight organic overshoot, less aggressive than before
   const organicEase = "ease-[cubic-bezier(0.34,1.3,0.64,1)]";
   
-  // Interactive hover classes for petals
-  // We switch duration and ease after bloom is finished to make hovers snappy
-  const transitionClass = bloomFinished 
+  // Bloom transition logic - only used for the initial open scale
+  const bloomTransitionClass = bloomFinished 
     ? "transition-all duration-300 ease-out" 
     : `transition-all duration-[1800ms] ${organicEase}`;
-    
-  const petalHoverClasses = "cursor-pointer hover:scale-110 hover:brightness-110 hover:drop-shadow-lg";
 
   // Render Ripple Elements helper
   const renderRipples = (petalId: string) => {
@@ -176,6 +177,37 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
         className="w-full h-full overflow-visible"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <clipPath id="petal-clip">
+            <path d={petalPath} />
+          </clipPath>
+
+          {/* Pot Gradients for Volumetric Look */}
+          <linearGradient id="potBodyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#78350f" /> {/* Dark Edge */}
+            <stop offset="20%" stopColor="#92400e" /> {/* Base Color */}
+            <stop offset="50%" stopColor="#b45309" /> {/* Highlight Center */}
+            <stop offset="80%" stopColor="#92400e" /> {/* Base Color */}
+            <stop offset="100%" stopColor="#78350f" /> {/* Dark Edge */}
+          </linearGradient>
+
+          <linearGradient id="potRimGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#451a03" /> {/* Very Dark Edge */}
+            <stop offset="25%" stopColor="#78350f" />
+            <stop offset="50%" stopColor="#92400e" /> {/* Highlight */}
+            <stop offset="75%" stopColor="#78350f" />
+            <stop offset="100%" stopColor="#451a03" />
+          </linearGradient>
+
+          {/* Clay Texture Filter */}
+          <filter id="clay-texture" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" in="noise" result="opacityNoise" />
+            <feComposite operator="in" in="opacityNoise" in2="SourceGraphic" result="maskedNoise" />
+            <feBlend mode="multiply" in="maskedNoise" in2="SourceGraphic" />
+          </filter>
+        </defs>
+
         {/* Pot Shadow */}
         <ellipse cx="100" cy="290" rx="50" ry="8" fill="rgba(0,0,0,0.2)" className="blur-sm" />
 
@@ -251,18 +283,27 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                   {layer1.map((petal, i) => (
                     <g key={petal.id} transform={`rotate(${petal.rotation}) scale(${petal.scale})`}>
                       <g 
-                        className={`origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
+                        className={`group cursor-pointer origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
                         style={{ animationDelay: `${i * 0.15}s`, animationDuration: '3s' }}
                         onClick={(e) => handlePetalClick(e, petal.id)}
                       >
-                        <path
-                          d={petalPath}
-                          fill={palette.backPetal}
-                          className={`${transitionClass} origin-bottom ${petalHoverClasses} ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms` }}
-                        />
+                        {/* Petal Bloom Wrapper */}
+                        <g 
+                            className={`${bloomTransitionClass} origin-bottom ${flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+                            style={{ transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms` }}
+                        >
+                            {/* Base Petal */}
+                            <path d={petalPath} fill={palette.backPetal} />
+                            
+                            {/* Liquid Fill */}
+                            <g clipPath="url(#petal-clip)">
+                                <path 
+                                    d={liquidShapeIrregular} 
+                                    fill={palette.frontPetal} 
+                                    className="svg-liquid opacity-80" 
+                                />
+                            </g>
+                        </g>
                         {renderRipples(petal.id)}
                       </g>
                     </g>
@@ -272,18 +313,26 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                   {layer2.map((petal, i) => (
                     <g key={petal.id} transform={`rotate(${petal.rotation}) scale(${petal.scale})`}>
                       <g 
-                        className={`origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
+                        className={`group cursor-pointer origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
                         style={{ animationDelay: `${i * 0.15 + 0.2}s`, animationDuration: '2.8s' }}
                         onClick={(e) => handlePetalClick(e, petal.id)}
                       >
-                        <path
-                          d={petalPath}
-                          fill={palette.backPetal}
-                          className={`${transitionClass} origin-bottom ${petalHoverClasses} ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms` }}
-                        />
+                         <g 
+                            className={`${bloomTransitionClass} origin-bottom ${flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+                            style={{ transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms` }}
+                        >
+                            {/* Base Petal */}
+                            <path d={petalPath} fill={palette.backPetal} />
+
+                            {/* Liquid Fill */}
+                            <g clipPath="url(#petal-clip)">
+                                <path 
+                                    d={liquidShapeIrregular} 
+                                    fill={palette.frontPetal} 
+                                    className="svg-liquid opacity-80" 
+                                />
+                            </g>
+                        </g>
                         {renderRipples(petal.id)}
                       </g>
                     </g>
@@ -293,30 +342,37 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                   {layer3.map((petal, i) => (
                     <g key={petal.id} transform={`rotate(${petal.rotation}) scale(${petal.scale})`}>
                       <g 
-                        className={`origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
+                        className={`group cursor-pointer origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
                         style={{ animationDelay: `${i * 0.15 + 0.5}s`, animationDuration: '3.2s' }}
                         onClick={(e) => handlePetalClick(e, petal.id)}
                       >
-                        <path
-                          d={petalPath}
-                          fill={palette.frontPetal}
-                          className={`${transitionClass} origin-bottom ${petalHoverClasses} ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ 
-                            transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms`,
-                            filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.1))'
-                          }}
-                        />
-                        <path
-                          d="M0,0 C-3,-10 -6,-25 0,-40 C6,-25 3,-10 0,0"
-                          fill={palette.highlight}
-                          fillOpacity="0.5"
-                          className={`pointer-events-none transition-all duration-[1800ms] origin-bottom ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ transitionDelay: `${petal.delay + 100}ms` }}
-                        />
+                        <g 
+                            className={`${bloomTransitionClass} origin-bottom ${flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+                            style={{ 
+                                transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms`,
+                                filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.1))'
+                            }}
+                        >
+                            {/* Base Petal */}
+                            <path d={petalPath} fill={palette.frontPetal} />
+
+                            {/* Liquid Fill */}
+                            <g clipPath="url(#petal-clip)">
+                                <path 
+                                    d={liquidShapeIrregular} 
+                                    fill={palette.highlight} 
+                                    className="svg-liquid opacity-80" 
+                                />
+                            </g>
+
+                            {/* Texture/Highlight Overlay */}
+                            <path
+                                d="M0,0 C-3,-10 -6,-25 0,-40 C6,-25 3,-10 0,0"
+                                fill={palette.highlight}
+                                fillOpacity="0.5"
+                                className="pointer-events-none"
+                            />
+                        </g>
                         {renderRipples(petal.id)}
                       </g>
                     </g>
@@ -326,31 +382,37 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                   {layer4.map((petal, i) => (
                     <g key={petal.id} transform={`rotate(${petal.rotation}) scale(${petal.scale})`}>
                       <g 
-                        className={`origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
+                        className={`group cursor-pointer origin-bottom ${isBreezy ? 'animate-sway' : ''}`} 
                         style={{ animationDelay: `${i * 0.15 + 0.7}s`, animationDuration: '2.5s' }}
                         onClick={(e) => handlePetalClick(e, petal.id)}
                       >
-                        <path
-                          d={petalPath}
-                          fill={palette.frontPetal}
-                          fillOpacity="0.9"
-                          className={`${transitionClass} origin-bottom ${petalHoverClasses} ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ 
-                            transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms`,
-                            filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.1))'
-                          }}
-                        />
-                         <path
-                          d="M0,0 C-3,-10 -6,-25 0,-40 C6,-25 3,-10 0,0"
-                          fill={palette.highlight}
-                          fillOpacity="0.6"
-                          className={`pointer-events-none transition-all duration-[1800ms] origin-bottom ${
-                            flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                          }`}
-                          style={{ transitionDelay: `${petal.delay + 100}ms` }}
-                        />
+                         <g 
+                            className={`${bloomTransitionClass} origin-bottom ${flowerBloom ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+                            style={{ 
+                                transitionDelay: bloomFinished ? '0ms' : `${petal.delay}ms`,
+                                filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.1))'
+                            }}
+                        >
+                            {/* Base Petal */}
+                            <path d={petalPath} fill={palette.frontPetal} fillOpacity="0.9" />
+
+                             {/* Liquid Fill */}
+                            <g clipPath="url(#petal-clip)">
+                                <path 
+                                    d={liquidShapeIrregular} 
+                                    fill={palette.highlight} 
+                                    className="svg-liquid opacity-90" 
+                                />
+                            </g>
+
+                             {/* Texture/Highlight Overlay */}
+                            <path
+                                d="M0,0 C-3,-10 -6,-25 0,-40 C6,-25 3,-10 0,0"
+                                fill={palette.highlight}
+                                fillOpacity="0.6"
+                                className="pointer-events-none"
+                            />
+                        </g>
                         {renderRipples(petal.id)}
                       </g>
                     </g>
@@ -402,29 +464,29 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
         {/* Pot Body - Static (does not sway) */}
         <g transform="translate(100, 270)">
           {/* Rim */}
-          <path d="M-40,0 L40,0 L36,12 L-36,12 Z" fill="#78350f" /> {/* amber-900 */}
+          <path d="M-40,0 L40,0 L36,12 L-36,12 Z" fill="url(#potRimGradient)" filter="url(#clay-texture)" />
           {/* Rim Detail - horizontal inset line */}
           <path d="M-38,6 L38,6" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
 
           {/* Base */}
-          <path d="M-32,12 L32,12 L24,60 L-24,60 Z" fill="#92400e" /> {/* amber-800 */}
+          <path d="M-32,12 L32,12 L24,60 L-24,60 Z" fill="url(#potBodyGradient)" filter="url(#clay-texture)" />
           
           {/* Texture: Horizontal bands (turned clay look) */}
           <path d="M-30,24 Q0,28 30,24" stroke="rgba(0,0,0,0.1)" strokeWidth="1" fill="none" />
           <path d="M-28,36 Q0,40 28,36" stroke="rgba(0,0,0,0.1)" strokeWidth="1" fill="none" />
           <path d="M-26,48 Q0,52 26,48" stroke="rgba(0,0,0,0.1)" strokeWidth="1" fill="none" />
 
-          {/* Texture: Speckles */}
-          <circle cx="-10" cy="20" r="1" fill="rgba(0,0,0,0.2)" />
-          <circle cx="15" cy="30" r="1.5" fill="rgba(0,0,0,0.2)" />
-          <circle cx="-5" cy="45" r="1" fill="rgba(0,0,0,0.2)" />
-          <circle cx="10" cy="50" r="1" fill="rgba(0,0,0,0.2)" />
-          <circle cx="-20" cy="35" r="1" fill="rgba(0,0,0,0.2)" />
+          {/* Texture: Speckles - Reduced size/opacity as noise filter provides texture */}
+          <circle cx="-10" cy="20" r="1" fill="rgba(0,0,0,0.3)" />
+          <circle cx="15" cy="30" r="1.5" fill="rgba(0,0,0,0.3)" />
+          <circle cx="-5" cy="45" r="1" fill="rgba(0,0,0,0.3)" />
+          <circle cx="10" cy="50" r="1" fill="rgba(0,0,0,0.3)" />
+          <circle cx="-20" cy="35" r="1" fill="rgba(0,0,0,0.3)" />
 
           {/* Shine/Highlight */}
-          <path d="M-20,15 L-15,55" stroke="rgba(255,255,255,0.15)" strokeWidth="8" strokeLinecap="round" className="blur-[1px]" />
+          <path d="M-20,15 L-15,55" stroke="rgba(255,255,255,0.1)" strokeWidth="8" strokeLinecap="round" className="blur-[1px]" />
         </g>
       </svg>
     </div>
   );
-};
+}

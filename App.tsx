@@ -144,26 +144,34 @@ const App: React.FC = () => {
 
         {/* Controls */}
         <div className="flex flex-wrap items-center justify-center gap-6 mt-8 bg-slate-800/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl max-w-full">
+          
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all hover:scale-105 active:scale-95 shadow-lg border border-white/10 group"
+            className="liquid-btn flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-xl font-medium shadow-lg border border-white/10 group"
+            style={{ '--btn-color': currentPalette.frontPetal } as React.CSSProperties}
           >
-            <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-            Re-Bloom
+            <span className="relative z-10 flex items-center gap-2">
+              <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform" />
+              Re-Bloom
+            </span>
           </button>
 
           <div className="h-8 w-px bg-white/20 mx-2 hidden sm:block" />
 
           <button
             onClick={toggleBreeze}
-            className={`p-3 rounded-xl transition-all border ${
+            className={`liquid-btn flex items-center gap-2 px-6 py-3 rounded-xl font-medium shadow-lg border transition-all ${
               isBreezy 
-                ? 'bg-sky-500/20 border-sky-400/50 text-sky-200' 
-                : 'bg-white/5 border-transparent text-slate-300 hover:text-white hover:bg-white/10'
+                ? 'bg-sky-500/20 border-sky-400/50 text-white' 
+                : 'bg-white/10 border-white/10 text-slate-200 hover:text-white'
             }`}
+            style={{ '--btn-color': isBreezy ? '#0ea5e9' : currentPalette.frontPetal } as React.CSSProperties}
             title="Toggle Breeze"
           >
-            <Wind className={`w-5 h-5 ${isBreezy ? 'animate-pulse' : ''}`} />
+             <span className="relative z-10 flex items-center gap-2">
+              <Wind className={`w-5 h-5 ${isBreezy ? 'animate-pulse' : ''}`} />
+              {isBreezy ? 'Breeze On' : 'Breeze Off'}
+            </span>
           </button>
           
           <div className="h-8 w-px bg-white/20 mx-2 hidden sm:block" />

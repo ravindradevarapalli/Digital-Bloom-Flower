@@ -55,6 +55,61 @@
         background-color: #0f172a;
         color: white;
       }
+      
+      /* Liquid Button Effect */
+      .liquid-btn {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: color 0.4s ease-in-out;
+      }
+      
+      .liquid-btn span, 
+      .liquid-btn svg {
+        position: relative;
+        z-index: 10; /* Keep text/icon on top */
+      }
+      
+      .liquid-btn::before {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translate(-50%, 0) rotate(0deg);
+        width: 140%; /* Wider than button */
+        padding-bottom: 140%; /* Make it a square aspect ratio based on width */
+        background-color: var(--btn-color, #38bdf8);
+        border-radius: 40% 45% 40% 35%; /* Organic liquid blob shape */
+        transition: top 0.7s ease-in-out, transform 0.7s ease-in-out;
+        z-index: 0;
+      }
+      
+      .liquid-btn:hover::before {
+        top: -20%; /* Move up to cover button */
+        transform: translate(-50%, 0) rotate(200deg); /* Rotate to simulate swirling */
+      }
+      
+      .liquid-btn:active::before {
+        transition: top 0.1s;
+        filter: brightness(0.9);
+      }
+
+      /* SVG Petal Liquid Effect */
+      .svg-liquid {
+        /* Start position: pushed down (positive Y) to be hidden */
+        transform: translateY(80px) rotate(0deg);
+        /* Smooth, fluid transition using cubic-bezier for organic feel */
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+        transform-box: fill-box;
+        transform-origin: center center;
+      }
+      
+      /* Trigger hover on the group wrapper */
+      .group:hover .svg-liquid {
+        /* Rise up (negative Y) and rotate significantly to simulate liquid swirl */
+        transform: translateY(-40px) rotate(220deg);
+      }
     </style>
   <script type="importmap">
 {
