@@ -162,8 +162,8 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
             key={ripple.id}
             cx={ripple.x}
             cy={ripple.y}
-            r="10"
-            fill={palette.highlight}
+            r="12"
+            fill="rgba(255, 255, 255, 0.7)"
             className="animate-ripple pointer-events-none"
             style={{ transformOrigin: `${ripple.x}px ${ripple.y}px` }}
           />
@@ -302,9 +302,9 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                     fill={palette.frontPetal} 
                                     className="svg-liquid opacity-80" 
                                 />
+                                {renderRipples(petal.id)}
                             </g>
                         </g>
-                        {renderRipples(petal.id)}
                       </g>
                     </g>
                   ))}
@@ -331,9 +331,9 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                     fill={palette.frontPetal} 
                                     className="svg-liquid opacity-80" 
                                 />
+                                {renderRipples(petal.id)}
                             </g>
                         </g>
-                        {renderRipples(petal.id)}
                       </g>
                     </g>
                   ))}
@@ -363,6 +363,7 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                     fill={palette.highlight} 
                                     className="svg-liquid opacity-80" 
                                 />
+                                {renderRipples(petal.id)}
                             </g>
 
                             {/* Texture/Highlight Overlay */}
@@ -373,7 +374,6 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                 className="pointer-events-none"
                             />
                         </g>
-                        {renderRipples(petal.id)}
                       </g>
                     </g>
                   ))}
@@ -403,6 +403,7 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                     fill={palette.highlight} 
                                     className="svg-liquid opacity-90" 
                                 />
+                                {renderRipples(petal.id)}
                             </g>
 
                              {/* Texture/Highlight Overlay */}
@@ -413,7 +414,6 @@ export const FlowerPot: React.FC<FlowerPotProps> = ({ isBreezy, palette }) => {
                                 className="pointer-events-none"
                             />
                         </g>
-                        {renderRipples(petal.id)}
                       </g>
                     </g>
                   ))}
